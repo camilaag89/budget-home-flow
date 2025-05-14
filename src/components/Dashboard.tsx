@@ -209,7 +209,6 @@ export function Dashboard() {
                     <Progress 
                       value={progress} 
                       className={isOverBudget ? 'bg-red-100' : undefined}
-                      indicatorClassName={isOverBudget ? 'bg-red-500' : undefined}
                     />
                   </div>
                 );

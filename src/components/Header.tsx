@@ -56,7 +56,7 @@ export function Header() {
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="end">
           <Calendar
-            mode="month"
+            mode="single"
             defaultMonth={date}
             selected={date}
             onSelect={handleSelect}
