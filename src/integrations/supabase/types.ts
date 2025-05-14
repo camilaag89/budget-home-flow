@@ -9,57 +9,54 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      licenças_ambientais: {
+      construction: {
         Row: {
           "Área Construída": number | null
           "Área do Terreno": number | null
           Cidade: string | null
           CNPJ: string | null
-          created_at: string
           Data: string | null
           Endereço: string | null
           "Full Text": string | null
           id: number
-          Latitude: number | null
-          Longitude: number | null
+          latitude: number | null
+          longitude: number | null
           "Nome da Empresa": string | null
           "Nome do Arquivo": string | null
+          Status: string | null
           "Tipo de Licença": string | null
-          updated_at: string | null
         }
         Insert: {
           "Área Construída"?: number | null
           "Área do Terreno"?: number | null
           Cidade?: string | null
           CNPJ?: string | null
-          created_at: string
           Data?: string | null
           Endereço?: string | null
           "Full Text"?: string | null
           id?: number
-          Latitude?: number | null
-          Longitude?: number | null
+          latitude?: number | null
+          longitude?: number | null
           "Nome da Empresa"?: string | null
           "Nome do Arquivo"?: string | null
+          Status?: string | null
           "Tipo de Licença"?: string | null
-          updated_at?: string | null
         }
         Update: {
           "Área Construída"?: number | null
           "Área do Terreno"?: number | null
           Cidade?: string | null
           CNPJ?: string | null
-          created_at?: string
           Data?: string | null
           Endereço?: string | null
           "Full Text"?: string | null
           id?: number
-          Latitude?: number | null
-          Longitude?: number | null
+          latitude?: number | null
+          longitude?: number | null
           "Nome da Empresa"?: string | null
           "Nome do Arquivo"?: string | null
+          Status?: string | null
           "Tipo de Licença"?: string | null
-          updated_at?: string | null
         }
         Relationships: []
       }
