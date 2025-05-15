@@ -9,6 +9,24 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      categories: {
+        Row: {
+          id: string
+          name: string
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       constructions: {
         Row: {
           "Área Construída": number | null
@@ -57,6 +75,107 @@ export type Database = {
           "Nome do Arquivo"?: string | null
           Status?: string | null
           "Tipo de Licença"?: string | null
+        }
+        Relationships: []
+      }
+      future_installments: {
+        Row: {
+          amount: number
+          id: string
+          installment_number: number
+          month: string
+          transaction_id: string
+        }
+        Insert: {
+          amount: number
+          id?: string
+          installment_number: number
+          month: string
+          transaction_id: string
+        }
+        Update: {
+          amount?: number
+          id?: string
+          installment_number?: number
+          month?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "future_installments_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spending_goals: {
+        Row: {
+          amount: number
+          category: string
+          end_date: string | null
+          id: string
+          period: string
+          start_date: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          end_date?: string | null
+          id?: string
+          period: string
+          start_date: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          end_date?: string | null
+          id?: string
+          period?: string
+          start_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          category: string
+          current_installment: number | null
+          date: string
+          description: string
+          id: string
+          installments: number | null
+          payment_method: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          current_installment?: number | null
+          date: string
+          description: string
+          id?: string
+          installments?: number | null
+          payment_method: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          current_installment?: number | null
+          date?: string
+          description?: string
+          id?: string
+          installments?: number | null
+          payment_method?: string
+          type?: string
+          user_id?: string
         }
         Relationships: []
       }

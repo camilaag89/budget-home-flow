@@ -53,10 +53,27 @@ export function TransactionForm() {
   
   const transactionType = watch('type');
   const paymentMethod = watch('paymentMethod');
+  const selectedCategory = watch('category');
 
   const onSubmit = (data: FormData) => {
     // Ensure date is set
     data.date = date || new Date();
+    
+    // Ensure category is valid
+    if (!data.category && !showNewCategory) {
+      toast({
+        title: "Erro na transação",
+        description: "Selecione uma categoria ou crie uma nova.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // If adding a new category, save it first
+    if (showNewCategory && newCategory.trim()) {
+      addCategory(newCategory.trim());
+      data.category = newCategory.trim();
+    }
     
     // Save the transaction
     addTransaction(data);
@@ -70,6 +87,8 @@ export function TransactionForm() {
     // Reset form and close dialog
     reset();
     setDate(new Date());
+    setNewCategory('');
+    setShowNewCategory(false);
     setOpen(false);
   };
 
@@ -79,6 +98,11 @@ export function TransactionForm() {
       setValue('category', newCategory.trim());
       setNewCategory('');
       setShowNewCategory(false);
+      
+      toast({
+        title: "Categoria adicionada",
+        description: `A categoria ${newCategory.trim()} foi adicionada com sucesso.`,
+      });
     }
   };
 
@@ -267,21 +291,28 @@ export function TransactionForm() {
                 </div>
               ) : (
                 <Select
+                  value={selectedCategory || undefined}
                   onValueChange={(value) => setValue('category', value)}
                 >
                   <SelectTrigger className="rounded-md">
                     <SelectValue placeholder="Selecione uma categoria" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
+                    {categories.length > 0 ? (
+                      categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="" disabled>
+                        Nenhuma categoria disponível
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
               )}
-              {errors.category && <p className="text-xs text-red-500">Categoria é obrigatória</p>}
+              {errors.category && !showNewCategory && <p className="text-xs text-red-500">Categoria é obrigatória</p>}
             </div>
           </div>
           
