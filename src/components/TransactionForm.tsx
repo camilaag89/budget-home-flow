@@ -28,7 +28,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { CalendarIcon, Plus } from 'lucide-react';
+import { CalendarIcon, Plus, CreditCard, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 
@@ -85,123 +85,156 @@ export function TransactionForm() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="fixed bottom-6 right-6 rounded-full h-14 w-14 shadow-lg">
+        <Button 
+          className="fixed bottom-6 right-6 rounded-full h-14 w-14 shadow-lg hover:shadow-xl transition-all hover:scale-105" 
+          style={{ 
+            background: 'linear-gradient(45deg, #3B82F6, #2563EB)', 
+            boxShadow: '0 4px 14px rgba(59, 130, 246, 0.5)'
+          }}
+        >
           <Plus size={24} />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Nova Transação</DialogTitle>
+      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden rounded-lg shadow-xl">
+        <DialogHeader className="px-6 pt-6">
+          <DialogTitle className="text-xl">Nova Transação</DialogTitle>
           <DialogDescription>
             Adicione uma nova transação ao seu controle financeiro.
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2 col-span-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-6">
+          <div className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div 
+                className={`flex flex-col items-center justify-center p-4 rounded-lg border cursor-pointer transition-all ${
+                  transactionType === 'income' 
+                    ? 'bg-green-50 border-green-300 shadow-sm' 
+                    : 'bg-white hover:bg-gray-50'
+                }`}
+                onClick={() => setValue('type', 'income')}
+              >
+                <ArrowUpCircle 
+                  size={28} 
+                  className={`${transactionType === 'income' ? 'text-green-600' : 'text-gray-400'} mb-2`} 
+                />
+                <span className={`text-sm font-medium ${transactionType === 'income' ? 'text-green-800' : 'text-gray-500'}`}>
+                  Receita
+                </span>
+              </div>
+              
+              <div 
+                className={`flex flex-col items-center justify-center p-4 rounded-lg border cursor-pointer transition-all ${
+                  transactionType === 'expense' 
+                    ? 'bg-red-50 border-red-300 shadow-sm' 
+                    : 'bg-white hover:bg-gray-50'
+                }`}
+                onClick={() => setValue('type', 'expense')}
+              >
+                <ArrowDownCircle 
+                  size={28} 
+                  className={`${transactionType === 'expense' ? 'text-red-600' : 'text-gray-400'} mb-2`} 
+                />
+                <span className={`text-sm font-medium ${transactionType === 'expense' ? 'text-red-800' : 'text-gray-500'}`}>
+                  Despesa
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="description">Descrição</Label>
               <Input 
                 id="description" 
                 placeholder="Ex: Supermercado"
+                className="rounded-md"
                 {...register('description', { required: true })}
               />
               {errors.description && <p className="text-xs text-red-500">Descrição é obrigatória</p>}
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="amount">Valor (R$)</Label>
-              <Input 
-                id="amount" 
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0,00"
-                {...register('amount', { required: true, min: 0.01, valueAsNumber: true })}
-              />
-              {errors.amount && <p className="text-xs text-red-500">Valor válido é obrigatório</p>}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="date">Data</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "dd/MM/yyyy") : <span>Selecione uma data</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={(newDate) => {
-                      setDate(newDate);
-                      if (newDate) {
-                        setValue('date', newDate);
-                      }
-                    }}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="type">Tipo</Label>
-              <Select 
-                defaultValue="expense"
-                onValueChange={(value) => setValue('type', value as TransactionType)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="income">Receita</SelectItem>
-                  <SelectItem value="expense">Despesa</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="paymentMethod">Método de Pagamento</Label>
-              <Select 
-                defaultValue="debit"
-                onValueChange={(value) => setValue('paymentMethod', value as PaymentMethod)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o método" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="credit">Cartão de Crédito</SelectItem>
-                  <SelectItem value="debit">Débito</SelectItem>
-                  <SelectItem value="cash">Dinheiro</SelectItem>
-                  <SelectItem value="transfer">Transferência</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {paymentMethod === 'credit' && transactionType === 'expense' && (
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="installments">Parcelas</Label>
+                <Label htmlFor="amount">Valor (R$)</Label>
                 <Input 
-                  id="installments" 
+                  id="amount" 
                   type="number"
-                  min="1"
-                  placeholder="1"
-                  {...register('installments', { valueAsNumber: true, min: 1 })}
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                  className="rounded-md"
+                  {...register('amount', { required: true, min: 0.01, valueAsNumber: true })}
                 />
+                {errors.amount && <p className="text-xs text-red-500">Valor válido é obrigatório</p>}
               </div>
-            )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="date">Data</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal rounded-md",
+                        !date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {date ? format(date, "dd/MM/yyyy") : <span>Selecione uma data</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={(newDate) => {
+                        setDate(newDate);
+                        if (newDate) {
+                          setValue('date', newDate);
+                        }
+                      }}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
             
-            <div className="space-y-2 col-span-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="paymentMethod">Método de Pagamento</Label>
+                <Select 
+                  defaultValue="debit"
+                  onValueChange={(value) => setValue('paymentMethod', value as PaymentMethod)}
+                >
+                  <SelectTrigger className="rounded-md">
+                    <SelectValue placeholder="Selecione o método" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="credit">Cartão de Crédito</SelectItem>
+                    <SelectItem value="debit">Débito</SelectItem>
+                    <SelectItem value="cash">Dinheiro</SelectItem>
+                    <SelectItem value="transfer">Transferência</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {paymentMethod === 'credit' && transactionType === 'expense' && (
+                <div className="space-y-2">
+                  <Label htmlFor="installments">Parcelas</Label>
+                  <Input 
+                    id="installments" 
+                    type="number"
+                    min="1"
+                    placeholder="1"
+                    className="rounded-md"
+                    {...register('installments', { valueAsNumber: true, min: 1 })}
+                  />
+                </div>
+              )}
+            </div>
+            
+            <div className="space-y-2">
               <div className="flex justify-between">
                 <Label htmlFor="category">Categoria</Label>
                 <Button 
@@ -209,7 +242,7 @@ export function TransactionForm() {
                   variant="ghost" 
                   size="sm"
                   onClick={() => setShowNewCategory(!showNewCategory)}
-                  className="text-xs h-6"
+                  className="text-xs h-6 hover:text-primary"
                 >
                   {showNewCategory ? 'Usar categoria existente' : 'Nova categoria'}
                 </Button>
@@ -221,8 +254,14 @@ export function TransactionForm() {
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value)}
                     placeholder="Nova categoria"
+                    className="rounded-md"
                   />
-                  <Button type="button" onClick={handleAddCategory} size="sm">
+                  <Button 
+                    type="button" 
+                    onClick={handleAddCategory} 
+                    size="sm"
+                    className="whitespace-nowrap"
+                  >
                     Adicionar
                   </Button>
                 </div>
@@ -230,7 +269,7 @@ export function TransactionForm() {
                 <Select
                   onValueChange={(value) => setValue('category', value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="rounded-md">
                     <SelectValue placeholder="Selecione uma categoria" />
                   </SelectTrigger>
                   <SelectContent>
@@ -246,8 +285,24 @@ export function TransactionForm() {
             </div>
           </div>
           
-          <DialogFooter>
-            <Button type="submit" className="w-full md:w-auto">Salvar Transação</Button>
+          <DialogFooter className="mt-8 pt-4 border-t">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setOpen(false)}
+              className="rounded-md"
+            >
+              Cancelar
+            </Button>
+            <Button 
+              type="submit" 
+              className="rounded-md"
+              style={{ 
+                background: 'linear-gradient(45deg, #3B82F6, #2563EB)'
+              }}
+            >
+              Salvar Transação
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

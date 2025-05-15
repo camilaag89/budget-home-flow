@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { format, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LogOut, CreditCard, BarChart2, Target } from 'lucide-react';
 import { useFinance } from '@/context/FinanceContext';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
@@ -45,12 +45,12 @@ const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onChangeTab = 
   };
 
   return (
-    <header className="bg-white shadow">
+    <header className="bg-white shadow-sm">
       <div className="flex flex-col">
         {/* Barra superior com navegação de meses */}
         <div className="flex justify-between items-center p-4">
           <div className="flex items-center">
-            <h1 className="text-xl font-medium mr-2">Finanças</h1>
+            <h1 className="text-xl font-semibold mr-2 text-primary">Finanças</h1>
             {user && (
               <div className="text-xs text-muted-foreground">
                 {user.email}
@@ -64,13 +64,14 @@ const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onChangeTab = 
               size="icon"
               onClick={handlePreviousMonth}
               aria-label="Mês anterior"
+              className="hover:bg-gray-100"
             >
               <ChevronLeft size={20} />
             </Button>
             
             <button 
               onClick={handleCurrentMonth}
-              className="px-3 font-medium"
+              className="px-3 font-medium text-gray-700 hover:text-primary transition-colors"
             >
               {formattedMonth}
             </button>
@@ -80,6 +81,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onChangeTab = 
               size="icon"
               onClick={handleNextMonth}
               aria-label="Próximo mês"
+              className="hover:bg-gray-100"
             >
               <ChevronRight size={20} />
             </Button>
@@ -89,7 +91,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onChangeTab = 
               size="icon"
               onClick={() => signOut()}
               aria-label="Sair"
-              className="ml-2"
+              className="ml-2 hover:bg-gray-100 hover:text-red-500"
             >
               <LogOut size={18} />
             </Button>
@@ -97,37 +99,40 @@ const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onChangeTab = 
         </div>
         
         {/* Abas de navegação */}
-        <nav className="flex border-b overflow-x-auto">
+        <nav className="flex border-b overflow-x-auto px-4">
           <button 
-            className={`px-4 py-2 font-medium text-sm whitespace-nowrap ${
+            className={`flex items-center px-4 py-3 font-medium text-sm whitespace-nowrap ${
               activeTab === 'dashboard' 
                 ? 'text-primary border-b-2 border-primary' 
                 : 'text-muted-foreground hover:text-foreground'
             }`}
             onClick={() => onChangeTab('dashboard')}
           >
+            <BarChart2 size={18} className="mr-2" />
             Dashboard
           </button>
           
           <button 
-            className={`px-4 py-2 font-medium text-sm whitespace-nowrap ${
+            className={`flex items-center px-4 py-3 font-medium text-sm whitespace-nowrap ${
               activeTab === 'transactions' 
                 ? 'text-primary border-b-2 border-primary' 
                 : 'text-muted-foreground hover:text-foreground'
             }`}
             onClick={() => onChangeTab('transactions')}
           >
+            <CreditCard size={18} className="mr-2" />
             Transações
           </button>
           
           <button 
-            className={`px-4 py-2 font-medium text-sm whitespace-nowrap ${
+            className={`flex items-center px-4 py-3 font-medium text-sm whitespace-nowrap ${
               activeTab === 'goals' 
                 ? 'text-primary border-b-2 border-primary' 
                 : 'text-muted-foreground hover:text-foreground'
             }`}
             onClick={() => onChangeTab('goals')}
           >
+            <Target size={18} className="mr-2" />
             Metas
           </button>
         </nav>

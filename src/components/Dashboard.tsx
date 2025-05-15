@@ -62,43 +62,43 @@ export function Dashboard() {
   
   return (
     <div className="p-6 space-y-6">
-      <h2 className="text-2xl font-bold">{formattedMonth}</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-2">{formattedMonth}</h2>
       
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="finance-card-income border overflow-hidden">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center text-green-600">
+            <CardTitle className="text-sm font-medium flex items-center text-green-700">
               <ArrowUp className="mr-2 h-4 w-4" />
               Receitas
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(income)}</div>
+            <div className="text-2xl font-bold text-green-800">{formatCurrency(income)}</div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="finance-card-expense border overflow-hidden">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center text-red-600">
+            <CardTitle className="text-sm font-medium flex items-center text-red-700">
               <ArrowDown className="mr-2 h-4 w-4" />
               Despesas
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(expense)}</div>
+            <div className="text-2xl font-bold text-red-800">{formatCurrency(expense)}</div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="finance-card-balance border overflow-hidden">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center">
+            <CardTitle className="text-sm font-medium flex items-center text-blue-700">
               <DollarSign className="mr-2 h-4 w-4" />
               Saldo
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`text-2xl font-bold ${balance >= 0 ? 'text-green-700' : 'text-red-700'}`}>
               {formatCurrency(balance)}
             </div>
           </CardContent>
@@ -108,26 +108,28 @@ export function Dashboard() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Monthly Trend */}
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Histórico Mensal</CardTitle>
+        <Card className="border shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold">Histórico Mensal</CardTitle>
             <CardDescription>Receitas e despesas dos últimos 6 meses</CardDescription>
           </CardHeader>
           <CardContent className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip 
                   formatter={(value: number) => formatCurrency(value)}
                   labelFormatter={(label) => `${label}`}
+                  contentStyle={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
                 />
                 <Legend />
                 <Line 
                   type="monotone" 
                   dataKey="receita" 
                   stroke="#10B981" 
+                  strokeWidth={2}
                   activeDot={{ r: 8 }} 
                   name="Receita" 
                 />
@@ -135,6 +137,7 @@ export function Dashboard() {
                   type="monotone" 
                   dataKey="despesa" 
                   stroke="#EF4444" 
+                  strokeWidth={2}
                   name="Despesa" 
                 />
               </LineChart>
@@ -143,9 +146,9 @@ export function Dashboard() {
         </Card>
         
         {/* Category Breakdown */}
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Despesas por Categoria</CardTitle>
+        <Card className="border shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold">Despesas por Categoria</CardTitle>
             <CardDescription>Distribuição de gastos no mês atual</CardDescription>
           </CardHeader>
           <CardContent className="h-80">
@@ -155,7 +158,7 @@ export function Dashboard() {
                 layout="vertical"
                 margin={{ top: 5, right: 30, left: 70, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis type="number" />
                 <YAxis 
                   dataKey="name" 
@@ -166,10 +169,12 @@ export function Dashboard() {
                 <Tooltip 
                   formatter={(value: number) => formatCurrency(value)}
                   labelFormatter={(label) => `${label}`}
+                  contentStyle={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
                 />
                 <Bar 
                   dataKey="value" 
-                  fill="#8B5CF6" 
+                  fill="#8B5CF6"
+                  radius={[0, 4, 4, 0]}
                   name="Valor"
                 />
               </BarChart>
@@ -180,10 +185,10 @@ export function Dashboard() {
       
       {/* Goals Section */}
       {spendingGoals.length > 0 && (
-        <Card>
+        <Card className="border shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <TrendingUp className="mr-2 h-5 w-5 text-finance-amber" />
+            <CardTitle className="flex items-center text-lg font-semibold">
+              <TrendingUp className="mr-2 h-5 w-5 text-accent" />
               Metas de Gastos
             </CardTitle>
             <CardDescription>
@@ -198,7 +203,7 @@ export function Dashboard() {
                 const isOverBudget = spent > goal.amount;
                 
                 return (
-                  <div key={goal.id} className="space-y-1">
+                  <div key={goal.id} className="space-y-2">
                     <div className="flex justify-between items-center">
                       <div className="font-medium">{goal.category}</div>
                       <div className={`text-sm ${isOverBudget ? 'text-red-500 font-medium' : ''}`}>
@@ -208,7 +213,7 @@ export function Dashboard() {
                     </div>
                     <Progress 
                       value={progress} 
-                      className={isOverBudget ? 'bg-red-100' : undefined}
+                      className={`h-2 ${isOverBudget ? 'bg-red-100' : 'bg-blue-100'}`}
                     />
                   </div>
                 );
@@ -219,10 +224,10 @@ export function Dashboard() {
       )}
       
       {/* Credit Card Section */}
-      <Card>
+      <Card className="border shadow-sm">
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <CreditCard className="mr-2 h-5 w-5 text-finance-blue" />
+          <CardTitle className="flex items-center text-lg font-semibold">
+            <CreditCard className="mr-2 h-5 w-5 text-primary" />
             Compras Parceladas
           </CardTitle>
           <CardDescription>
@@ -249,7 +254,7 @@ export function Dashboard() {
                   const installments = getTotalExpense(monthKey);
                   
                   return (
-                    <tr key={monthKey} className="border-b last:border-0">
+                    <tr key={monthKey} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
                       <td className="py-3 text-left capitalize">{monthName}</td>
                       <td className="py-3 text-right font-medium">
                         {formatCurrency(installments)}

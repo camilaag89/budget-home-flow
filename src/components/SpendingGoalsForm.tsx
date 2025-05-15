@@ -22,7 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { PiggyBank } from 'lucide-react';
+import { PiggyBank, Plus, Target } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -83,72 +83,99 @@ export function SpendingGoalsForm() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold">Metas de Gastos</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Metas de Gastos</h2>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button>Nova Meta</Button>
+            <Button 
+              className="rounded-md flex items-center shadow-sm transition-all hover:shadow"
+              style={{ 
+                background: 'linear-gradient(45deg, #3B82F6, #2563EB)'
+              }}
+            >
+              <Plus size={18} className="mr-1" />
+              Nova Meta
+            </Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Criar Nova Meta de Gastos</DialogTitle>
+          <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden rounded-lg">
+            <DialogHeader className="px-6 pt-6">
+              <DialogTitle className="text-xl">Criar Nova Meta de Gastos</DialogTitle>
               <DialogDescription>
                 Defina um limite de gastos para uma categoria específica.
               </DialogDescription>
             </DialogHeader>
             
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label htmlFor="category">Categoria</Label>
-                <Select
-                  onValueChange={(value) => setValue('category', value)}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 px-6 pb-6">
+              <div className="space-y-4 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="category">Categoria</Label>
+                  <Select
+                    onValueChange={(value) => setValue('category', value)}
+                  >
+                    <SelectTrigger className="rounded-md">
+                      <SelectValue placeholder="Selecione uma categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.category && <p className="text-xs text-red-500">Categoria é obrigatória</p>}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Valor Limite (R$)</Label>
+                  <Input 
+                    id="amount" 
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0,00"
+                    className="rounded-md"
+                    {...register('amount', { required: true, min: 0.01, valueAsNumber: true })}
+                  />
+                  {errors.amount && <p className="text-xs text-red-500">Valor válido é obrigatório</p>}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="period">Período</Label>
+                  <Select 
+                    defaultValue="monthly"
+                    onValueChange={(value) => setValue('period', value as 'monthly' | 'yearly')}
+                  >
+                    <SelectTrigger className="rounded-md">
+                      <SelectValue placeholder="Selecione o período" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="monthly">Mensal</SelectItem>
+                      <SelectItem value="yearly">Anual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              
+                <input type="hidden" {...register('startDate')} value={format(new Date(), 'yyyy-MM-dd')} />
+              </div>
+              
+              <DialogFooter className="pt-4 mt-4 border-t">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setOpen(false)}
+                  className="rounded-md"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.category && <p className="text-xs text-red-500">Categoria é obrigatória</p>}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="amount">Valor Limite (R$)</Label>
-                <Input 
-                  id="amount" 
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0,00"
-                  {...register('amount', { required: true, min: 0.01, valueAsNumber: true })}
-                />
-                {errors.amount && <p className="text-xs text-red-500">Valor válido é obrigatório</p>}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="period">Período</Label>
-                <Select 
-                  defaultValue="monthly"
-                  onValueChange={(value) => setValue('period', value as 'monthly' | 'yearly')}
+                  Cancelar
+                </Button>
+                <Button 
+                  type="submit"
+                  className="rounded-md"
+                  style={{ 
+                    background: 'linear-gradient(45deg, #3B82F6, #2563EB)'
+                  }}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o período" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="monthly">Mensal</SelectItem>
-                    <SelectItem value="yearly">Anual</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <input type="hidden" {...register('startDate')} value={format(new Date(), 'yyyy-MM-dd')} />
-              
-              <DialogFooter>
-                <Button type="submit">Salvar Meta</Button>
+                  Salvar Meta
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -156,13 +183,21 @@ export function SpendingGoalsForm() {
       </div>
       
       {spendingGoals.length === 0 ? (
-        <div className="text-center p-10 bg-muted rounded-lg">
-          <PiggyBank className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+        <div className="text-center p-10 bg-gray-50 rounded-lg border border-gray-100">
+          <PiggyBank className="mx-auto h-12 w-12 text-blue-400 mb-4" />
           <h3 className="text-lg font-medium mb-2">Nenhuma meta definida</h3>
           <p className="text-muted-foreground mb-4">
             Adicione metas de gastos para controlar melhor suas finanças.
           </p>
-          <Button onClick={() => setOpen(true)}>Adicionar Meta</Button>
+          <Button 
+            onClick={() => setOpen(true)}
+            className="rounded-md shadow-sm"
+            style={{ 
+              background: 'linear-gradient(45deg, #3B82F6, #2563EB)'
+            }}
+          >
+            Adicionar Meta
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -170,25 +205,41 @@ export function SpendingGoalsForm() {
             const progress = getGoalProgress(goal.id);
             
             return (
-              <Card key={goal.id}>
+              <Card key={goal.id} className="border overflow-hidden transition-all hover:shadow-md">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">{goal.category}</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center">
+                      <Target size={16} className="mr-2 text-blue-500" />
+                      {goal.category}
+                    </CardTitle>
+                    <span className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-full">
+                      {goal.period === 'monthly' ? 'Mensal' : 'Anual'}
+                    </span>
+                  </div>
                   <CardDescription>
-                    Meta {goal.period === 'monthly' ? 'Mensal' : 'Anual'} de Gastos
+                    Meta de Gastos
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold mb-2">{formatCurrency(goal.amount)}</div>
-                  <Progress value={progress} className="h-2 mb-2" />
+                  <div className="text-2xl font-bold mb-2 text-gray-800">{formatCurrency(goal.amount)}</div>
+                  <Progress 
+                    value={progress} 
+                    className="h-2 mb-2"
+                    style={{
+                      backgroundColor: '#e2e8f0',
+                      backgroundImage: `linear-gradient(to right, ${progress > 80 ? '#ef4444' : progress > 60 ? '#f59e0b' : '#3b82f6'}, ${progress > 80 ? '#f87171' : progress > 60 ? '#fbbf24' : '#60a5fa'})`,
+                    }}
+                  />
                   <div className="text-sm text-muted-foreground">
                     {progress.toFixed(0)}% utilizado
                   </div>
                 </CardContent>
-                <CardFooter className="pt-0 justify-end">
+                <CardFooter className="pt-0 justify-end border-t p-4 mt-2">
                   <Button 
                     variant="outline" 
                     size="sm" 
                     onClick={() => handleDelete(goal.id)}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md"
                   >
                     Excluir
                   </Button>
