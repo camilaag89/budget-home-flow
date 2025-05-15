@@ -1,5 +1,5 @@
 
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { FinanceProvider } from '@/context/FinanceContext';
 import { Layout } from '@/components/Layout';
 

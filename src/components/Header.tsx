@@ -8,11 +8,11 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 
 interface HeaderProps {
-  activeTab: string;
-  onChangeTab: (tab: string) => void;
+  activeTab?: string;
+  onChangeTab?: (tab: string) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ activeTab, onChangeTab }) => {
+const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onChangeTab = () => {} }) => {
   const { currentMonth, setCurrentMonth } = useFinance();
   const { signOut, user } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);

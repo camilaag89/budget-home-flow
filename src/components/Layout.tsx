@@ -1,6 +1,7 @@
+
 import { ReactNode } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Header } from '@/components/Header';
+import Header from '@/components/Header';
 import { Dashboard } from '@/components/Dashboard';
 import { TransactionsList } from '@/components/TransactionsList';
 import { SpendingGoalsForm } from '@/components/SpendingGoalsForm';
