@@ -9,7 +9,7 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      construction: {
+      constructions: {
         Row: {
           "Área Construída": number | null
           "Área do Terreno": number | null

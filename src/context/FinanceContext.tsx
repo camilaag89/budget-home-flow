@@ -1,10 +1,9 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/toast';
 import { v4 as uuidv4 } from 'uuid';
 
 export type TransactionType = 'income' | 'expense';
@@ -88,7 +87,10 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function loadCategories() {
       try {
-        const { data, error } = await supabase.from('categories').select('name');
+        const { data, error } = await supabase
+          .from('categories')
+          .select('name');
+          
         if (error) {
           console.error('Erro ao carregar categorias:', error);
           return;
