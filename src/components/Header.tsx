@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { format, addMonths, subMonths } from 'date-fns';
+import React, { useState, useEffect } from 'react';
+import { format, addMonths, subMonths, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, LogOut, CreditCard, BarChart2, Target } from 'lucide-react';
 import { useFinance } from '@/context/FinanceContext';
@@ -16,25 +16,42 @@ const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onChangeTab = 
   const { currentMonth, setCurrentMonth } = useFinance();
   const { signOut, user } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
-
-  // Converter currentMonth (YYYY-MM) em um objeto Date
-  const currentDate = new Date(currentMonth + '-01');
+  const [displayMonth, setDisplayMonth] = useState('');
   
-  // Formatar o mês para exibição
-  const formattedMonth = format(currentDate, 'MMMM yyyy', { locale: ptBR });
+  // Update display month whenever currentMonth changes
+  useEffect(() => {
+    try {
+      // Ensure we have a valid ISO date string for the currentMonth
+      const currentDate = parseISO(`${currentMonth}-01`);
+      const formattedMonth = format(currentDate, 'MMMM yyyy', { locale: ptBR });
+      setDisplayMonth(formattedMonth);
+    } catch (error) {
+      console.error('Error formatting month:', error);
+    }
+  }, [currentMonth]);
   
   // Navegar para o mês anterior
   const handlePreviousMonth = () => {
-    const previousDate = subMonths(currentDate, 1);
-    const previousMonth = format(previousDate, 'yyyy-MM');
-    setCurrentMonth(previousMonth);
+    try {
+      const currentDate = parseISO(`${currentMonth}-01`);
+      const previousDate = subMonths(currentDate, 1);
+      const previousMonth = format(previousDate, 'yyyy-MM');
+      setCurrentMonth(previousMonth);
+    } catch (error) {
+      console.error('Error navigating to previous month:', error);
+    }
   };
   
   // Navegar para o mês seguinte
   const handleNextMonth = () => {
-    const nextDate = addMonths(currentDate, 1);
-    const nextMonth = format(nextDate, 'yyyy-MM');
-    setCurrentMonth(nextMonth);
+    try {
+      const currentDate = parseISO(`${currentMonth}-01`);
+      const nextDate = addMonths(currentDate, 1);
+      const nextMonth = format(nextDate, 'yyyy-MM');
+      setCurrentMonth(nextMonth);
+    } catch (error) {
+      console.error('Error navigating to next month:', error);
+    }
   };
   
   // Voltar para o mês atual
@@ -71,9 +88,9 @@ const Header: React.FC<HeaderProps> = ({ activeTab = 'dashboard', onChangeTab = 
             
             <button 
               onClick={handleCurrentMonth}
-              className="px-3 font-medium text-gray-700 hover:text-primary transition-colors"
+              className="px-3 font-medium text-gray-700 hover:text-primary transition-colors min-w-24 text-center"
             >
-              {formattedMonth}
+              {displayMonth}
             </button>
             
             <Button 
