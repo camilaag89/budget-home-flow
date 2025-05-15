@@ -1,14 +1,21 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/hooks/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 
 export type TransactionType = 'income' | 'expense';
-
 export type PaymentMethod = 'credit' | 'debit' | 'cash' | 'transfer';
+
+// Define interfaces for our data structures
+export interface FutureInstallment {
+  id: string;
+  transactionId: string;
+  month: string;
+  amount: number;
+  installmentNumber: number;
+}
 
 export interface Transaction {
   id: string;
@@ -23,14 +30,6 @@ export interface Transaction {
   futureInstallments?: FutureInstallment[];
 }
 
-export interface FutureInstallment {
-  id: string;
-  transactionId: string;
-  month: string; // Format: YYYY-MM
-  amount: number;
-  installmentNumber: number;
-}
-
 export interface SpendingGoal {
   id: string;
   category: string;
@@ -41,43 +40,44 @@ export interface SpendingGoal {
 }
 
 interface MonthlyTotal {
-  month: string; // Format: YYYY-MM
+  month: string;
   income: number;
   expense: number;
 }
 
 interface FinanceContextType {
-  currentMonth: string; // Format: YYYY-MM
-  setCurrentMonth: (month: string) => void;
+  currentMonth: string;
+  setCurrentMonth: React.Dispatch<React.SetStateAction<string>>;
   transactions: Transaction[];
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
-  updateTransaction: (id: string, transaction: Partial<Transaction>) => void;
+  updateTransaction: (id: string, updatedFields: Partial<Transaction>) => void;
   deleteTransaction: (id: string) => void;
   spendingGoals: SpendingGoal[];
   addSpendingGoal: (goal: Omit<SpendingGoal, 'id'>) => void;
-  updateSpendingGoal: (id: string, goal: Partial<SpendingGoal>) => void;
+  updateSpendingGoal: (id: string, updatedFields: Partial<SpendingGoal>) => void;
   deleteSpendingGoal: (id: string) => void;
   categories: string[];
   addCategory: (category: string) => void;
   getMonthlyTransactions: (month: string) => Transaction[];
-  getMonthlyTotals: (months?: number) => MonthlyTotal[];
+  getMonthlyTotals: (monthsCount?: number) => MonthlyTotal[];
   getGoalProgress: (goalId: string) => number;
   getTotalIncome: (month: string) => number;
   getTotalExpense: (month: string) => number;
   getCategoryTotal: (category: string, month: string) => number;
-  getFutureInstallments: (month: string) => FutureInstallment[];
+  getFutureInstallments: (month: string) => (FutureInstallment & { transactionId: string })[];
   isLoading: boolean;
 }
 
 const FinanceContext = createContext<FinanceContextType | null>(null);
 
-function generateId(): string {
+// Function to generate unique IDs
+function generateId() {
   return uuidv4();
 }
 
 export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const [currentMonth, setCurrentMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
+  const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [spendingGoals, setSpendingGoals] = useState<SpendingGoal[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -90,14 +90,14 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         const { data, error } = await supabase
           .from('categories')
           .select('name');
-          
+        
         if (error) {
           console.error('Erro ao carregar categorias:', error);
           return;
         }
         
         if (data) {
-          const categoryNames = data.map(cat => cat.name);
+          const categoryNames = data.map((cat) => cat.name);
           setCategories(categoryNames);
         }
       } catch (error) {
@@ -114,21 +114,40 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
       return;
     }
-
+    
     async function loadUserData() {
       setIsLoading(true);
+      
       try {
         // Carregar transações
         const { data: transactionsData, error: transactionsError } = await supabase
           .from('transactions')
-          .select('*, future_installments(*)')
+          .select('*')
           .eq('user_id', user.id);
-
+          
         if (transactionsError) {
           console.error('Erro ao carregar transações:', transactionsError);
         } else if (transactionsData) {
+          // Buscar instalações futuras em uma consulta separada
+          const { data: installmentsData } = await supabase
+            .from('future_installments')
+            .select('*');
+            
+          // Agrupar instalações por ID de transação
+          const installmentsByTransaction: Record<string, any[]> = {};
+          
+          if (installmentsData) {
+            installmentsData.forEach(installment => {
+              const transactionId = installment.transaction_id;
+              if (!installmentsByTransaction[transactionId]) {
+                installmentsByTransaction[transactionId] = [];
+              }
+              installmentsByTransaction[transactionId].push(installment);
+            });
+          }
+          
           // Converter dados do banco para o formato usado no app
-          const formattedTransactions = transactionsData.map(t => ({
+          const formattedTransactions = transactionsData.map((t) => ({
             id: t.id,
             description: t.description,
             amount: Number(t.amount),
@@ -138,35 +157,35 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
             paymentMethod: t.payment_method as PaymentMethod,
             installments: t.installments,
             currentInstallment: t.current_installment,
-            futureInstallments: t.future_installments?.map((fi: any) => ({
+            futureInstallments: installmentsByTransaction[t.id]?.map((fi) => ({
               id: fi.id,
               transactionId: fi.transaction_id,
               month: fi.month,
               amount: Number(fi.amount),
-              installmentNumber: fi.installment_number,
-            })),
+              installmentNumber: fi.installment_number
+            }))
           }));
           
           setTransactions(formattedTransactions);
         }
-
+        
         // Carregar metas de gastos
         const { data: goalsData, error: goalsError } = await supabase
           .from('spending_goals')
           .select('*')
           .eq('user_id', user.id);
-
+          
         if (goalsError) {
           console.error('Erro ao carregar metas:', goalsError);
         } else if (goalsData) {
           // Converter dados do banco para o formato usado no app
-          const formattedGoals = goalsData.map(g => ({
+          const formattedGoals = goalsData.map((g) => ({
             id: g.id,
             category: g.category,
             amount: Number(g.amount),
             period: g.period as 'monthly' | 'yearly',
             startDate: new Date(g.start_date),
-            endDate: g.end_date ? new Date(g.end_date) : undefined,
+            endDate: g.end_date ? new Date(g.end_date) : undefined
           }));
           
           setSpendingGoals(formattedGoals);
@@ -177,7 +196,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
       }
     }
-
+    
     loadUserData();
   }, [user]);
 
@@ -769,7 +788,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     isLoading,
   };
 
-  return <FinanceContext.Provider value={value}>{children}</FinanceContext.Provider>;
+  return (
+    <FinanceContext.Provider value={value}>
+      {children}
+    </FinanceContext.Provider>
+  );
 }
 
 export function useFinance() {

@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Header } from '@/components/Header';
@@ -6,6 +5,9 @@ import { Dashboard } from '@/components/Dashboard';
 import { TransactionsList } from '@/components/TransactionsList';
 import { SpendingGoalsForm } from '@/components/SpendingGoalsForm';
 import { TransactionForm } from '@/components/TransactionForm';
+import { Toaster } from "@/components/ui/toaster";
+import { Sidebar } from "@/components/ui/sidebar";
+import { Outlet } from "react-router-dom";
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
